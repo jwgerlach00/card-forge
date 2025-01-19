@@ -25,6 +25,10 @@ import forge.gui.card.CardReaderExperiments;
 import forge.util.BuildInfo;
 import io.sentry.Sentry;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * Main class for Forge's swing application view.
  */
@@ -90,6 +94,71 @@ public final class Main {
         }
 
         System.exit(0);
+    }
+
+    public static String apiMain(final String[] args) {
+        Sentry.init(options -> {
+            options.setEnableExternalConfiguration(true);
+            options.setRelease(BuildInfo.getVersionString());
+            options.setEnvironment(System.getProperty("os.name"));
+            options.setTag("Java Version", System.getProperty("java.version"));
+            options.setShutdownTimeoutMillis(5000);
+            // these belong to sentry.properties, but somehow some OS/Zip tool discards it?
+            if (options.getDsn() == null || options.getDsn().isEmpty())
+                options.setDsn("https://87bc8d329e49441895502737c069067b@sentry.cardforge.org//3");
+        }, true);
+
+        // HACK - temporary solution to "Comparison method violates it's general contract!" crash
+        System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+
+        //Turn off the Java 2D system's use of Direct3D to improve rendering speed (particularly when Full Screen)
+        System.setProperty("sun.java2d.d3d", "false");
+
+        //Turn on OpenGl acceleration to improve performance
+        //System.setProperty("sun.java2d.opengl", "True");
+
+        //setup GUI interface
+        GuiBase.setInterface(new GuiDesktop());
+
+        //install our error handler
+        ExceptionHandler.registerErrorHandling();
+
+        // Start splash screen first, then data models, then controller.
+        if (args.length == 0) {
+            Singletons.initializeOnce(true);
+
+            // Controller can now step in and take over.
+            Singletons.getControl().initialize();
+            return "";
+        }
+
+        // command line startup here
+        String mode = args[0].toLowerCase();
+
+        switch (mode) {
+            case "sim":
+                Optional<Map<String, Integer>> simResults = ApiSimulateMatch.simulate(args);
+
+                if (simResults.isPresent()) {
+                    String winner = Collections.max(simResults.get().entrySet(), Map.Entry.comparingByValue()).getKey();
+                    return winner;
+                }
+                break;
+
+            case "parse":
+                CardReaderExperiments.parseAllCards(args);
+                break;
+
+            case "server":
+                System.out.println("Dedicated server mode.\nNot implemented.");
+                break;
+
+            default:
+                System.out.println("Unknown mode.\nKnown mode is 'sim', 'parse' ");
+                break;
+        }
+
+        return "ERROR";
     }
 
     @SuppressWarnings("deprecation")

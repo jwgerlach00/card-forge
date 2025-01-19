@@ -1,5 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion> 
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Required for sim-api. Parent here because sim-api parent is forge. -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.1</version>
+    </parent>
+
     <groupId>forge</groupId>
     <artifactId>forge</artifactId>
     <packaging>pom</packaging>
@@ -67,13 +75,14 @@
         <module>forge-ai</module>
         <module>forge-gui</module>
         <module>forge-gui-mobile</module>
-        <module>forge-gui-mobile-dev</module>
+        <!--        <module>forge-gui-mobile-dev</module>-->
         <module>forge-gui-desktop</module>
         <module>forge-gui-ios</module>
         <module>forge-lda</module>
         <module>adventure-editor</module>
         <module>forge-gui-android</module>
-        <module>forge-installer</module>
+        <module>forge-sim-api</module>
+        <!--        <module>forge-installer</module>-->
     </modules>
 
     <distributionManagement>
@@ -201,8 +210,8 @@
                     <configuration>
                         <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
                         <checkModificationExcludes>
-                          <checkModificationExclude>.mvn/local-settings.xml</checkModificationExclude>
-                          <checkModificationExclude>forge-gui/release-files/CHANGES.txt</checkModificationExclude>
+                            <checkModificationExclude>.mvn/local-settings.xml</checkModificationExclude>
+                            <checkModificationExclude>forge-gui/release-files/CHANGES.txt</checkModificationExclude>
                         </checkModificationExcludes>
                     </configuration>
                 </plugin>
@@ -362,6 +371,19 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Required for sim-api. Exclude logging because it conflicts with forge. -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+                <version>3.4.1</version>
+            </dependency>
+
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
