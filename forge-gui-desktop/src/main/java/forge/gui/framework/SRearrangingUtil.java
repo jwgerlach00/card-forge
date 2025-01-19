@@ -291,7 +291,7 @@ public final class SRearrangingUtil {
         }
 
         // Remove old cell if necessary, or, enforce rough bounds on new cell.
-        if (cellSrc.getDocs().isEmpty()) {
+        if (cellSrc.getDocs().size() == 0) {
             fillGap();
             FView.SINGLETON_INSTANCE.removeDragCell(cellSrc);
         }

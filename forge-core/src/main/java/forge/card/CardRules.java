@@ -108,12 +108,8 @@ public final class CardRules implements ICardCharacteristics {
         // CR 903.4 colors defined by its characteristic-defining abilities
         for (String staticAbility : face.getStaticAbilities()) {
             if (staticAbility.contains("CharacteristicDefining$ True") && staticAbility.contains("SetColor$ All")) {
-                return MagicColor.ALL_COLORS;
+                res |= MagicColor.ALL_COLORS;
             }
-        }
-        // no need to check oracle if it is already all colors
-        if (res == MagicColor.ALL_COLORS) {
-            return res;
         }
         int len = oracleText.length();
         for (int i = 0; i < len; i++) {
@@ -285,7 +281,14 @@ public final class CardRules implements ICardCharacteristics {
             return true;
         }
         CardType type = mainPart.getType();
-        if (type.isLegendary() && canBeCreature()) {
+        boolean creature = type.isCreature();
+        for (String staticAbility : mainPart.getStaticAbilities()) { // Check for Grist
+            if (staticAbility.contains("CharacteristicDefining$ True") && staticAbility.contains("AddType$ Creature")) {
+                creature = true;
+                break;
+            }
+        }
+        if (type.isLegendary() && creature) {
             return true;
         }
         return false;
@@ -353,8 +356,15 @@ public final class CardRules implements ICardCharacteristics {
         if (!type.isLegendary()) {
             return false;
         }
-        if (canBeCreature() || type.isPlaneswalker()) {
+        if (type.isCreature() || type.isPlaneswalker()) {
             return true;
+        }
+
+        // Grist is checked above, but new cards might work this way
+        for (String staticAbility : mainPart.getStaticAbilities()) {
+            if (staticAbility.contains("CharacteristicDefining$ True") && staticAbility.contains("AddType$ Creature")) {
+                return true;
+            }
         }
         return false;
     }
@@ -364,18 +374,12 @@ public final class CardRules implements ICardCharacteristics {
         if (!type.isLegendary()) {
             return false;
         }
-        if (canBeCreature() || type.isPlaneswalker()) {
+        if (type.isCreature() || type.isPlaneswalker()) {
             return true;
         }
-        return false;
-    }
 
-    public boolean canBeCreature() {
-        CardType type = mainPart.getType();
-        if (type.isCreature()) {
-            return true;
-        }
-        for (String staticAbility : mainPart.getStaticAbilities()) { // Check for Grist
+        // Grist is checked above, but new cards might work this way
+        for (String staticAbility : mainPart.getStaticAbilities()) {
             if (staticAbility.contains("CharacteristicDefining$ True") && staticAbility.contains("AddType$ Creature")) {
                 return true;
             }

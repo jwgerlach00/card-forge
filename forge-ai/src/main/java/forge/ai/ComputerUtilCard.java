@@ -2079,7 +2079,6 @@ public class ComputerUtilCard {
         return false;
     }
 
-    // use this function to skip expensive calculations on identical cards
     public static CardCollection dedupeCards(CardCollection cc) {
         if (cc.size() <= 1) {
             return cc;

@@ -14,9 +14,7 @@ import forge.game.card.CardLists;
 import forge.game.card.CardPredicates;
 import forge.game.card.CardZoneTable;
 import forge.game.event.GameEventCombatChanged;
-import forge.game.keyword.Keyword;
 import forge.game.player.Player;
-import forge.game.replacement.ReplacementType;
 import forge.game.spellability.SpellAbility;
 import forge.game.zone.PlayerZone;
 import forge.game.zone.ZoneType;
@@ -277,7 +275,11 @@ public class DigUntilEffect extends SpellAbilityEffect {
                 }
 
                 // Allow ordering the rest of the revealed cards
-                if ((finalDest.isKnown() || (finalDest == ZoneType.Library && !shuffle && !sa.hasParam("RevealRandomOrder"))) && revealed.size() >= 2) {
+                if (finalDest.isKnown() && revealed.size() >= 2) {
+                    revealed = (CardCollection)p.getController().orderMoveToZoneList(revealed, finalDest, sa);
+                }
+                if (finalDest == ZoneType.Library && !shuffle
+                        && !sa.hasParam("RevealRandomOrder") && revealed.size() >= 2) {
                     revealed = (CardCollection)p.getController().orderMoveToZoneList(revealed, finalDest, sa);
                 }
 
@@ -291,17 +293,6 @@ public class DigUntilEffect extends SpellAbilityEffect {
 
             if (shuffle) {
                 p.shuffle(sa);
-            }
-
-            if (sa.isKeyword(Keyword.CASCADE)) {
-                Map<AbilityKey, Object> runParams = AbilityKey.mapFromAffected(p);
-                runParams.put(AbilityKey.Cards, revealed);
-                game.getReplacementHandler().run(ReplacementType.Cascade, runParams);
-
-                if (sa.hasParam("RememberRevealed")) {
-                    final ZoneType removeZone = foundDest;
-                    host.removeRemembered(revealed.filter(c -> !c.isInZone(removeZone)));
-                }
             }
         } // end foreach player
         if (combatChanged) {
