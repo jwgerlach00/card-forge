@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import forge.util.MyRandom;
 import org.apache.commons.lang3.time.StopWatch;
 
 import forge.deck.Deck;
@@ -142,6 +143,7 @@ public class ApiSimulateMatch {
             int iGame = 0;
             while (!mc.isMatchOver()) {
                 // play games until the match ends
+                MyRandom.setRandom(new Random(42));
                 Optional<String> winner = simulateSingleMatch(mc, iGame, outputGamelog);
                 winner.ifPresent(s -> wins.put(s, wins.get(s) + 1));
                 iGame++;
