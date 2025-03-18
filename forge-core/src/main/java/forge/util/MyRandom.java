@@ -31,7 +31,8 @@ import java.util.Random;
  */
 public class MyRandom {
     /** Constant <code>random</code>. */
-    private static Random random = new SecureRandom();
+//    private static Random random = new SecureRandom();
+    private static final ThreadLocal<Random> threadLocalRandom = ThreadLocal.withInitial(() -> new Random(124L)); // Fixed seed
 
     /**
      * <p>
@@ -52,7 +53,8 @@ public class MyRandom {
      * @return the random
      */
     public static Random getRandom() {
-        return MyRandom.random;
+//        return MyRandom.random;
+        return threadLocalRandom.get();
     }
 
     /**
@@ -60,12 +62,15 @@ public class MyRandom {
      * @param random the random
      */
     public static void setRandom(Random random) {
-        MyRandom.random = random;
+//        MyRandom.random = random;
+        threadLocalRandom.set(random);
     }
 
     public static int[] splitIntoRandomGroups(final int value, final int numGroups) {
         int[] groups = new int[numGroups];
-        
+
+        Random random = getRandom(); // Use thread-local random
+
         for (int i = 0; i < value; i++) {
             groups[random.nextInt(numGroups)]++;
         }

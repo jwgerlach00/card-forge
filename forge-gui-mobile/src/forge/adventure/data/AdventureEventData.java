@@ -43,7 +43,7 @@ public class AdventureEventData implements Serializable {
     public AdventureEventController.EventStyle style;
     public AdventureEventController.EventStatus eventStatus;
     public AdventureEventController.EventFormat format;
-    private transient Random random = new Random();
+    private transient Random random = new Random(123L);
     public Deck registeredDeck;
     public Deck draftedDeck; //Copy of registered before basic lands are added for event reward purposes
     public List<Deck> jumpstartBoosters = new ArrayList<>();
